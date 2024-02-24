@@ -18,7 +18,7 @@ def get_subclasses(node: AnyNode):
     node_children: list[AnyNode] = []
 
     for subclass in node.value.__subclasses__():
-        # CHECK Reconsider the roles of id, value and name
+        # CHECK Reconsider the roles of id, value and name; N.B.: id is always string
         subclass_node = AnyNode(
             id=f"{subclass}", value=subclass, name=subclass.__name__, children=[]
         )
@@ -30,6 +30,21 @@ def get_subclasses(node: AnyNode):
 
         subclass_node.children = get_subclasses(subclass_node)
     return node_children
+
+
+def flatten(tree: RenderTree, flat_tree=None):
+    if flat_tree is None:
+        flat_tree = []
+
+    # FIXME
+    for row in tree:
+        node = tree.node
+        print(node, type(node))
+        if node.children:
+            flatten(RenderTree(node), flat_tree)
+        flat_tree.append(node)
+
+    return flat_tree
 
 
 def list_types_implementing_class(base_class):
@@ -57,3 +72,4 @@ print(implementing_types)
 print(RenderTree(root).by_attr("name"))
 print(len(implementing_types))  # Direct descendants only (?)
 print(len([n for n in RenderTree(root)]))
+print(flatten(RenderTree(root)))
