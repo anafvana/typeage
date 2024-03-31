@@ -48,6 +48,21 @@ def flatten_tree(node: TypeNode, flat_tree: set = None) -> set[TypeNode]:
     return flat_tree
 
 
+def flatten(node: TypeNode, flat_tree: set = None) -> set[type]:
+    if flat_tree is None:
+        flat_tree = set()
+
+    if node not in flat_tree:
+        flat_tree.add(node.value)
+
+    subclasses = node.value.__subclasses__()
+    if subclasses:
+        for subclass in subclasses:
+            flatten(TypeNode(value=subclass), flat_tree)
+
+    return flat_tree
+
+
 def list_types_implementing_class(base_class):
     """
     List all types that implement a given class.
@@ -64,6 +79,7 @@ def list_types_implementing_class(base_class):
         subclass for subclass in subclasses if inspect.isclass(subclass.value)
     ]
     return implementing_types
+
 
 # root = TypeNode(id=object, value=object, children=[])
 # root.children = get_subclasses(root)
