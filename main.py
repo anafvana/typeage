@@ -1,11 +1,13 @@
-from anytree import AnyNode, RenderTree
+from anytree import AnyNode, RenderTree  # type: ignore
 
 import inspect
 from typing import Sequence
 import collections
 
+from TypeNode import TypeNode
 
-def get_subclasses(node: AnyNode):
+
+def get_subclasses(node: TypeNode) -> list[TypeNode]:
     """
     Get all subclasses of a given class.
 
@@ -15,11 +17,11 @@ def get_subclasses(node: AnyNode):
     Returns:
     list: A list of subclasses of the given class.
     """
-    node_children: list[AnyNode] = []
+    node_children: list[TypeNode] = []
 
     for subclass in node.value.__subclasses__():
         # CHECK Reconsider the roles of id, value and name; N.B.: id is always string
-        subclass_node = AnyNode(
+        subclass_node = TypeNode(
             id=f"{subclass}", value=subclass, name=subclass.__name__, children=[]
         )
         node_children.append(subclass_node)
@@ -32,17 +34,16 @@ def get_subclasses(node: AnyNode):
     return node_children
 
 
-def flatten(tree: RenderTree, flat_tree=None):
+def flatten_tree(node: TypeNode, flat_tree: set = None) -> set[TypeNode]:
     if flat_tree is None:
-        flat_tree = []
+        flat_tree = set()
 
-    # FIXME
-    for row in tree:
-        node = tree.node
-        print(node, type(node))
-        if node.children:
-            flatten(RenderTree(node), flat_tree)
-        flat_tree.append(node)
+    if node not in flat_tree:
+        flat_tree.add(node)
+
+    if node.children:
+        for child in node.children:
+            flatten_tree(child, flat_tree)
 
     return flat_tree
 
@@ -64,12 +65,20 @@ def list_types_implementing_class(base_class):
     ]
     return implementing_types
 
+# root = TypeNode(id=object, value=object, children=[])
+# root.children = get_subclasses(root)
+# implementing_types = list_types_implementing_class(root)
+# print(implementing_types)
+# print(RenderTree(root).by_attr("name"))
+# print(len(implementing_types))  # Direct descendants only (?)
+# print(len([n for n in RenderTree(root)]))
+# print(flatten(RenderTree(root)))
 
-root = AnyNode(id=object, value=object, children=[])
-root.children = get_subclasses(root)
-implementing_types = list_types_implementing_class(root)
-print(implementing_types)
-print(RenderTree(root).by_attr("name"))
-print(len(implementing_types))  # Direct descendants only (?)
-print(len([n for n in RenderTree(root)]))
-print(flatten(RenderTree(root)))
+# root = AnyNode(id=object, value=object, children=[])
+# root.children = get_subclasses(root)
+# implementing_types = list_types_implementing_class(root)
+# print(implementing_types)
+# print(RenderTree(root).by_attr("name"))
+# print(len(implementing_types))  # Direct descendants only (?)
+# print(len([n for n in RenderTree(root)]))
+# print(flatten(RenderTree(root)))
